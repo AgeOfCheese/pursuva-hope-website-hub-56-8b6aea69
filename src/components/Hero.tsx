@@ -29,8 +29,8 @@ const Hero = () => {
             Quality courses and personalized tutoring in Python, Java, Mathematics, and test preparation for students of all backgrounds.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-pursuva-blue text-white hover:bg-pursuva-blue/90 transition-all">
-              Explore Our Courses
+            <Button size="lg" variant="outline" className="border-pursuva-blue text-pursuva-blue hover:bg-pursuva-blue hover:text-white transition-al">
+              <a href="#programs">Explore Our Courses</a>
             </Button>
             <Button size="lg" variant="outline" className="border-pursuva-purple text-pursuva-purple hover:bg-pursuva-purple hover:text-white transition-all">
               Meet Our Tutors
