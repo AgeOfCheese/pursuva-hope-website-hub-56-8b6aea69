@@ -1,8 +1,8 @@
 # Welcome to your Lovable project
 
 ## Project info
-
-**URL**: https://lovable.dev/projects/cbb21b10-a293-429e-8429-2c3dcbbc863e ##does not work you will have to run the code in a terminal
+## The method below does not work you will have to run the code in a terminal
+**URL**: https://lovable.dev/projects/cbb21b10-a293-429e-8429-2c3dcbbc863e 
 
 ## How can I edit this code?
 
