@@ -1,3 +1,13 @@
+# Environment variables
+.env
+.env.*
+*.env.local
+.env.local
+.env.*.local
+#useless stuff
+/node_modules
+/dist
+
 # Logs
 logs
 *.log
