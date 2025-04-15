@@ -192,6 +192,20 @@ function EnrollPage() {
                 required 
               />
             </div>
+            <div>
+            <Label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-foreground/80">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              // Link onChange to the correct state setter
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              disabled={isSubmitting}
+              className="w-full"
+              aria-required="true"
+            />
+          </div>
 
               {/* --- Course Selection --- */}
               <div className="space-y-4">
