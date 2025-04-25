@@ -5,31 +5,28 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // --- Authentication Imports ---
-import { AuthProvider } from "./context/AuthContext"; // Adjust path if needed
-import ProtectedRoute from "./components/ProtectedRoute"; // Adjust path if needed
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute"; // Add this import
 
 // --- Page Imports ---
-import Index from "./pages/Index"; // Your main page component
+import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import EnrollPage from "./pages/Enroll"; // Renamed import variable for clarity
+import EnrollPage from "./pages/Enroll";
 import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/Dashboard"; // Import the new Dashboard page
-
-// Unused import, can be removed:
-// import { LogIn } from "lucide-react";
+import DashboardPage from "./pages/Dashboard";
+import AdminDashboardPage from "@/components/admin/AdminDashboard"; 
+import AdminUsersPage from "./components/admin/AdminUsers";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      {/* AuthProvider should wrap BrowserRouter so context is available to all routes */}
       <AuthProvider>
-        <Toaster /> {/* Toasters can be inside or outside AuthProvider */}
+        <Toaster />
         <Sonner />
         <BrowserRouter>
-          {/* Navbar and Footer are likely rendered inside Index, EnrollPage etc. */}
-          {/* If Navbar/Footer were here, they'd need to be inside BrowserRouter */}
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Index />} />
@@ -46,8 +43,26 @@ const App = () => (
               }
             />
 
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboardPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <AdminRoute>
+                  <AdminUsersPage/>
+                </AdminRoute>
+              }
+            />
+
             {/* Catch-all Not Found Route - MUST BE LAST */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFound />} /> 
           </Routes>
         </BrowserRouter>
       </AuthProvider>

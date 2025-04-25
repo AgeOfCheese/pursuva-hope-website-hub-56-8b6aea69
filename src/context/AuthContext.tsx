@@ -1,51 +1,79 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { app } from '@/firebaseConfig'; // Import your Firebase app instance
+import { getAuth, onAuthStateChanged, User as FirebaseAuthUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { app, db } from '@/firebaseConfig';
+import { AppUser, UserDocument } from '@/types/firebase';
 
 interface AuthContextType {
-  currentUser: User | null;
-  loading: boolean; // To handle initial auth state check
+  currentUser: AppUser | null;
+  userData: UserDocument | null;
+  loading: boolean;
+  isAdmin: boolean;
 }
 
-// Create context with a default value
-const AuthContext = createContext<AuthContextType>({ currentUser: null, loading: true });
+const AuthContext = createContext<AuthContextType>({
+  currentUser: null,
+  userData: null,
+  loading: true,
+  isAdmin: false,
+});
 
-// Custom hook to use the auth context
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
-
-// Provider component
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [userData, setUserData] = useState<UserDocument | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const auth = getAuth(app);
-    // Listen for authentication state changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user); // Set user to null if logged out, or User object if logged in
-      setLoading(false); // Auth state determined, stop loading
-      console.log('Auth State Changed:', user ? `Logged in as ${user.email}` : 'Logged out');
+    
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Merge Firebase Auth user with Firestore data
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        
+        if (userDoc.exists()) {
+          const userDocData = userDoc.data() as UserDocument;
+          setUserData(userDocData);
+          
+          // Create extended user object
+          const extendedUser: AppUser = {
+            ...firebaseUser,
+            role: userDocData.role,
+            groups: userDocData.groups,
+            enrolledCourses: userDocData.enrolledCourses,
+          };
+          setCurrentUser(extendedUser);
+        } else {
+          // User doesn't have Firestore document yet
+          setCurrentUser(firebaseUser);
+          setUserData(null);
+        }
+      } else {
+        setCurrentUser(null);
+        setUserData(null);
+      }
+      setLoading(false);
     });
 
-    // Cleanup subscription on unmount
     return unsubscribe;
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
   const value = {
     currentUser,
+    userData,
     loading,
+    isAdmin: userData?.role === 'admin',
   };
 
-  // Render children only when not loading to prevent flash of incorrect UI
   return (
     <AuthContext.Provider value={value}>
       {!loading && children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);

@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox"; // <-- Import Checkbox component
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 
 // --- Firebase Imports ---
@@ -27,16 +27,13 @@ function EnrollPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  // State to track selected courses using an object { courseId: boolean }
   const [selectedCourses, setSelectedCourses] = useState<Record<string, boolean>>(
     AVAILABLE_COURSES.reduce((acc, course) => ({ ...acc, [course.id]: false }), {})
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Handler for checkbox changes
   const handleCourseChange = (courseId: string, checked: boolean | 'indeterminate') => {
-     // We only care about true/false for checked state
      if (typeof checked === 'boolean') {
          setSelectedCourses(prevState => ({
              ...prevState,
@@ -57,16 +54,9 @@ function EnrollPage() {
       return;
     }
 
-    // --- Get list of selected course IDs ---
     const enrolledCourses = Object.keys(selectedCourses).filter(
       courseId => selectedCourses[courseId] === true
     );
-
-    // Optional: Check if at least one course is selected
-    // if (enrolledCourses.length === 0) {
-    //   toast({ title: "No Courses Selected", description: "Please select at least one course.", variant: "destructive" });
-    //   return;
-    // }
 
     setIsSubmitting(true);
     console.log('Attempting to create user account:', { name, email, enrolledCourses });
@@ -79,24 +69,25 @@ function EnrollPage() {
       const user = userCredential.user;
       console.log('Firebase Auth user created successfully:', user.uid);
 
-      // Save User Profile Data (including courses)
+      // Save User Profile Data with role set to "student"
       const userDocRef = doc(db, "users", user.uid);
       await setDoc(userDocRef, {
         uid: user.uid,
         name: name,
         email: user.email,
-        enrolledCourses: enrolledCourses, // <-- Save selected courses here
+        enrolledCourses: enrolledCourses,
+        role: 'student', // <-- Add this line to set default role
         createdAt: serverTimestamp(),
       });
       console.log('User profile data saved to Firestore.');
 
-      // Save Enrollment Record (including courses)
+      // Save Enrollment Record
       const enrollmentsCollectionRef = collection(db, "enrollments");
       await addDoc(enrollmentsCollectionRef, {
         userId: user.uid,
         name: name,
         email: user.email,
-        enrolledCourses: enrolledCourses, // <-- Save selected courses here too
+        enrolledCourses: enrolledCourses,
         enrollmentTimestamp: serverTimestamp()
       });
       console.log('Enrollment record saved.');
@@ -113,12 +104,9 @@ function EnrollPage() {
       setEmail('');
       setPassword('');
       setConfirmPassword('');
-      // Reset selected courses checkboxes
       setSelectedCourses(AVAILABLE_COURSES.reduce((acc, course) => ({ ...acc, [course.id]: false }), {}));
 
-
     } catch (error: any) {
-        // ... (error handling remains the same) ...
         console.error("Firebase user creation failed:", error);
         let title = "Signup Failed";
         let description = "Could not create account. Please try again.";
@@ -198,7 +186,6 @@ function EnrollPage() {
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              // Link onChange to the correct state setter
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={isSubmitting}
@@ -207,16 +194,15 @@ function EnrollPage() {
             />
           </div>
 
-              {/* --- Course Selection --- */}
+              {/* Course Selection */}
               <div className="space-y-4">
                 <Label className="block text-sm font-medium text-gray-700">Select Courses</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> {/* Layout checkboxes */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {AVAILABLE_COURSES.map((course) => (
                     <div key={course.id} className="flex items-center space-x-2">
                       <Checkbox
                         id={course.id}
                         checked={selectedCourses[course.id]}
-                        // Pass checked state directly for Shadcn Checkbox
                         onCheckedChange={(checked) => handleCourseChange(course.id, checked)}
                         disabled={isSubmitting}
                       />
@@ -230,7 +216,6 @@ function EnrollPage() {
                   ))}
                 </div>
               </div>
-              {/* --- End Course Selection --- */}
 
               <Button type="submit" size="lg" disabled={isSubmitting} className="w-full bg-pursuva-blue text-white hover:bg-pursuva-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pursuva-blue disabled:opacity-50 transition-colors">
                 {isSubmitting ? 'Creating Account...' : 'Create Account & Enroll'}
