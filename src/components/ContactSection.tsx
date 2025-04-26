@@ -74,20 +74,9 @@ const ContactSection = () => {
     {
       icon: <Mail className="text-pursuva-blue" />,
       title: "Email Us",
-      details: "info@pursuva.org",
-      link: "mailto:info@pursuva.org"
+      details: "pursuvaedu@gmail.com",
+      link: "mailto:pursuvaedu@gmail.com"
     },
-    {
-      icon: <Phone className="text-pursuva-blue" />,
-      title: "Call Us",
-      details: "+1 (555) 123-4567",
-      link: "tel:+15551234567"
-    },
-    {
-      icon: <MapPin className="text-pursuva-blue" />,
-      title: "Visit Us",
-      details: "123 Learning Drive, Boston, MA 02115"
-    }
   ];
 
   return (
